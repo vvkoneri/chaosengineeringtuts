@@ -1,0 +1,38 @@
+{
+    "title": "Does our service tolerate the loss of its transaction log file?",
+    "description": "Our service reads and writes from an transaction log file, can it support that file disappearing?",
+    "tags": [
+        "blog",
+        "filesystem"
+    ],
+    "steady-state-hypothesis": {
+        "title": "The exchange file must exist",
+        "probes": [
+            {
+                "type": "probe",
+                "name": "service-is-unavailable",
+                "tolerance": [200, 503],
+                "provider": {
+                    "type": "http",
+                    "url": "http://localhost:8093/employees?dept=123&lastname=Martin"
+                }
+            }
+        ]
+    },
+    "method" : [
+        {
+            "name": "move-transaction-log-file",
+            "type": "action",
+            "provider": {
+                "type": "python",
+                "module": "os",
+                "func": "rename",
+                "arguments": {
+                    "src": "/Users/vekoneri/Documents/transaction.log",
+                    "dst": "/Users/vekoneri/Documents/transaction.log.old"
+                }
+            }
+        }
+    ]
+}
+

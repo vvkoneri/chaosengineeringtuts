@@ -1,0 +1,53 @@
+
+{
+    "title" : "Does service support db server being unavailable",
+    "description" : "Database contains the employee records to be returned, can service handle the database disconnecion",
+    "tags": [
+        "blog",
+        "database",
+        "mysql"
+    ],
+    "steady-state-hypothesis": {
+        "title": "The database server should be avaialble",
+        "probes": [
+            {
+                "type": "probe",
+                "name": "server-goes-down",
+                "tolerance": [200, 503],
+                "provider": {
+                    "type": "http",
+                    "url": "http://localhost:8093/employees?dept=123&lastname=Martin"
+                }
+            }
+        ]
+    }, 
+    "method" : [
+        {
+            "name": "shutdown-database-server",
+            "type": "action",
+            "provider": {
+                "type": "python",
+                "module": "os",
+                "func": "system",
+                "arguments": {
+                    "command": "echo <your-password> | sudo -S /usr/local/mysql/bin/mysqladmin shutdown -u root -p"
+                }
+            }
+        }
+    ],
+    "rollbacks": [
+        {
+            "type": "action",
+            "name": "restart-db",
+            "provider": {
+                "type": "python",
+                "module": "os",
+                "func": "system",
+                "arguments": {
+                    "command": "echo <your-password> | sudo -S /usr/local/mysql/bin/mysqld_safe &"
+                }
+            }
+        }
+    ]
+
+}
